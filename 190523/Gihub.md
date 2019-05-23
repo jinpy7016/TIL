@@ -33,9 +33,9 @@ Github으로 취업하기
 
 ``` public class Helloworld{}```
 
-​	
+ctrl + insert
 
-
+shift + insert
 
 
 
