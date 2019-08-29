@@ -1,175 +1,224 @@
-
-
 # Git
 
-> Gitì€ ë¶„ì‚°ë²„ì „ê´€ë¦¬ì‹œìŠ¤í…œ(DVCS) ì´ë‹¤.
+> GitÀº ºĞ»ê¹öÀü°ü¸®½Ã½ºÅÛ(DVCS)ÀÌ´Ù.
 >
-> ì†ŒìŠ¤ì½”ë“œì˜ ì´ë ¥ì„ ê´€ë¦¬í•œë‹¤.
+> ¼Ò½ºÄÚµåÀÇ ÀÌ·ÂÀ» °ü¸®ÇÑ´Ù.
 
-[ https://backlog.com/git-tutorial/kr/ ]
+* Âü°í ¹®¼­
+  * [Git scm](https://git-scm.com/book/ko/v2)
+  * [Git ÀÔ¹®](https://backlog.com/git-tutorial/kr/)
 
+## 1. git ¼³Á¤
 
-
-## 1. git ì„¤ì •
-
-git ì»¤ë°‹ì„ í•˜ê¸° ìœ„í•´ì„œëŠ” ì´ˆê¸°ì— ì‘ì„±ì(author) ì„¤ì •ì„ ë°˜ë“œì‹œ í•˜ì—¬ì•¼ í•œë‹¤.
-
-
+git Ä¿¹ÔÀ» ÇÏ±â À§ÇØ¼­´Â ÃÊ±â¿¡ ÀÛ¼ºÀÚ(author) ¼³Á¤À» ¹İµå½Ã ÇÏ¿©¾ß ÇÑ´Ù.
 
 ```bash
-$git config --global user.name
-$git config --global user.email
+$ git config --global user.name {»ç¿ëÀÚÀÌ¸§}
+$ git config --global user.email {»ç¿ëÀÚÀÌ¸ŞÀÏ}
+```
+
+ÇöÀç global·Î ¼³Á¤µÈ È¯°æ¼³Á¤À» È®ÀÎÇÏ±â À§ÇØ¼­´Â ¾Æ·¡ÀÇ ¸í·É¾î¸¦ ÀÛ¼ºÇÑ´Ù.
+
+```bash
+$ git config --global --list
+user.email=edutak.ssafy@gmail.com
+user.name=edutak
 ```
 
 
 
-## 2. git í™œìš© ê¸°ì´ˆ
+## 2. git È°¿ë ±âÃÊ
 
- 1. ë¡œì»¬ git ì €ì¥ì†Œ ì„¤ì •
+1. ·ÎÄÃ git ÀúÀå¼Ò ¼³Á¤
 
-    ```bash
-    $ git init
-    Initialized empty Git repository in C:/Users/student/Desktop/gitlearning/.git/
-    (master) $
-    ```
+   ```bash
+   $ git init
+   Initialized empty Git repository in C:/Users/student/Desktop/algorithms/.git/
+   (master) $
+   ```
 
-    - í•´ë‹¹ ë””ë ‰í† ë¦¬ì— .git/ í´ë”ê°€ ìƒì„±ëœë‹¤.
+   * ÇØ´ç µğ·ºÅä¸®¿¡ `.git/` Æú´õ°¡ »ı¼º µÈ´Ù.
+   * Ç×»ó `git init` ÇÏ±â Àü¿¡´Â ÇØ´ç Æú´õ°¡ ÀÌ¹Ì ·ÎÄÃ ÀúÀå¼ÒÀÎÁö(`(master)` ¿©ºÎ) È®ÀÎ ÇÏ¿©¾ß ÇÑ´Ù.
 
-    - í•­ìƒ ` git init` í•˜ê¸° ì „ì—ëŠ” í•´ë‹¹ í´ë”ê°€ ì´ë¯¸ ë¡œì»¬ ì €ì¥ì†Œì¸ì§€(master) ì—¬ë¶€ë¥¼
+2. add
 
-      í™•ì¸ í•´ì•¼ í•œë‹¤.
-    
-	  2. add
+   ```bash
+   $ git add .
+   $ git add README.md a.txt
+   $ git add folder/
+   $ git status
+   On branch master
+   Your branch is ahead of 'origin/master' by 1 commit.
+     (use "git push" to publish your local commits)
+   
+   Untracked files:
+     (use "git add <file>..." to include in what will be committed)
+   
+           Git.md
+   
+   nothing added to commit but untracked files present (use "git add" to track)
+   
+   ```
 
-    ```bash
-    $ git add .
-    $ git add README.md a.txt
-    $ git add folder/
-    ```
+   * `add` ¸í·É¾î¸¦ ÅëÇØ¼­ `Working directory`¿¡¼­ `INDEX(staging area)`·Î Æ¯Á¤ ÆÄÀÏµéÀ» ÀÌµ¿½ÃÅ²´Ù.
+   * Ä¿¹ÔÀ» ÇÒ ¸ñ·Ï¿¡ ½×´Â °ÍÀÌ´Ù.
 
-    - add ëª…ë ¹ì–´ë¥¼ í†µí•´ì„œ `working directory` ì—ì„œ INDEX(staging area) ë¡œ íŠ¹ì • 
+3. commit
 
-      íŒŒì¼ë“¤ì„ ì´ë™ì‹œí‚¨ë‹¤.
+   ```bash
+   $ git commit -m 'Ä¿¹Ô¸Ş½ÃÁö'
+   $ git commit
+   [master a1a04a7] README Á¦¸ñ ÀÛ¼º
+    1 file changed, 1 insertion(+)
+   $ git log
+   ```
 
-    - ì»¤ë°‹ì„ í•  ëª©ë¡ì— ìŒ“ëŠ” ê²ƒì´ë‹¤.
-
-	  
-
-    3.
-    
-    ```bash
-    $ git commit -m 'ì»¤ë°‹ë©”ì‹œì§€'
-$ git commit
-    ```
-    
-4.  ì»¤ë°‹ íˆìŠ¤í† ë¦¬ í™•ì¸í•˜ê¸°(log)
+4. Ä¿¹Ô È÷½ºÅä¸® È®ÀÎÇÏ±â(`log`)
 
    ```bash
    $ git log
    $ git log -2
-   $ git log --online
+   $ git log --oneline
    ```
 
-5.  í˜„ì¬ git ìƒíƒœ ì•Œì•„ë³´ê¸°(`status`)  ì¤‘ìš”! ìì£¼ ì…ë ¥í•´ì„œ 
+5. ÇöÀç git »óÅÂ ¾Ë¾Æº¸±â(`status`) **Áß¿ä! ÀÚÁÖ ÀÔ·ÂÇØ¼­ È®ÀÎÇÏÀÚ!**
 
    ```bash
-   
    $ git status
    ```
 
+## 3. ¿ø°İÀúÀå¼Ò(remote) È°¿ëÇÏ±â
 
+### 1. ±âÃÊ
 
-## 3.ì›ê²©ì €ì¥ì†Œ(remote) í™œìš©í•˜ê¸°
-
-1. remote ì €ì¥ì†Œ ë“±ë¡
+1. remote ÀúÀå¼Ò µî·Ï
 
    ```bash
    $ git remote add origin {github URL}
    ```
 
-   - ì›ê²© ì €ì¥ì†Œë¥¼ `origin`ì´ë¼ëŠ” ì´ë¦„ìœ¼ë¡œ `URL` ì„ ë“±ë¡í•œë‹¤.
+   * ¿ø°İ ÀúÀå¼Ò¸¦ `origin` ÀÌ¶ó´Â ÀÌ¸§À¸·Î `URL` À» µî·ÏÇÑ´Ù.
 
-2.  remote ì €ì¥ì†Œ í™•ì¸
+2. remote ÀúÀå¼Ò È®ÀÎ
 
    ```bash
    $ git remote -v
    ```
 
-3.  remote ì €ì¥ì†Œ ì‚­ì œ
+3. remote ÀúÀå¼Ò »èÁ¦
 
    ```bash
-   $ git push origin master2
+   $ git remote rm {ÀúÀå¼Ò ÀÌ¸§}
    ```
 
+### 2. Push - Pull
 
+1. ¿ø°İ ÀúÀå¼Ò·Î º¸³»±â (`push`)
 
-## 2. Push -pull
+    ```bash
+    $ git push origin master
+    ```
 
-1. ì›ê²© ì €ì¥ì†Œë¡œ ë³´ë‚´ê¸°(push)
-
-   ```bash
-   $ git push origin master
-   ```
-
-2.  ì›ê²© ì €ì¥ì†Œë¡œë¶€í„° ê°€ì ¸ì˜¤ê¸°(`pull`)
+2. ¿ø°İ ÀúÀå¼Ò·ÎºÎÅÍ °¡Á®¿À±â(`pull`)
 
    ```bash
    $ git pull origin master
    ```
 
-   
+### 3. Push-Pull ½Ã³ª¸®¿À
 
-## 3. Push-pull ì‹œë‚˜ë¦¬ì˜¤
+Local A, Local B, GithubÀ¸·Î È°¿ëÀ» ÇÏ´Â °æ¿ì ¿ø°İÀúÀå¼Ò ÀÌ·Â°ú ´Ş¶óÁ®¼­ Ãæµ¹ÀÌ ¹ß»ıÇÒ ¼ö ÀÖ´Ù. µû¶ó¼­, Ç×»ó ÀÛ¾÷À» ½ÃÀÛÇÏ±âÀü¿¡ `pull` À» ¹Ş°í, ÀÛ¾÷À» ¿Ï·áÇÑ ÀÌÈÄ¿¡ `push`¸¦ ÁøÇàÇÏ¸é Ãæµ¹ »çÇ×ÀÌ ¹ß»ıÇÏÁö ¾Ê´Â´Ù!
 
-Local A, Local B, Githubìœ¼ë¡œ í™œìš©ì„ í•˜ëŠ” ê²½ìš° ì›ê²©ì €ì¥ì†Œ ì´ë ¥ê³¼ ë‹¬ë¼ì ¸ì„œ ì¶©ëŒì´ ë°œìƒí•  ìˆ˜ ìˆë‹¤.
+1. auto-merge
 
-ë”°ë¼ì„œ, í•­ìƒ ì‘ì—…ì„ ì‹œì‘í•˜ê¸°ì „ì—  pull ì„ ë°›ê³ , ì‘ì—…ì„ ì™„ë£Œí•œ ì´í›„ì— pushë¥¼ ì§„í–‰í•˜ë©´ ì¶©ëŒ ì‚¬í•­ì´ ë°œìƒí•˜ì§€ ì•ŠëŠ”ë‹¤!
+   * µ¿ÀÏÇÑ ÆÄÀÏÀ» ¼öÁ¤ÇÏÁö ¾ÊÀº °æ¿ì ÀÚµ¿À¸·Î merge commitÀÌ ¹ß»ı ÇÑ´Ù.
 
- 1. auto-merge
-
-    - ë™ì¼í•œ íŒŒì¼ì„ ìˆ˜ì •í•˜ì§€ ì•Šì€ ê²½ìš° ìë™ìœ¼ë¡œ merge commitì´ ë°œìƒ í•œë‹¤.
-
-    ``` 
-    1. Local Aì—ì„œ ì‘ì—… í›„ Push
-    2. Local Bì—ì„œ ì‘ì—… ì‹œ pullì„ ë°›ì§€ ì•ŠìŒ.
-    3. Local Bì—ì„œ ì‘ì—… í›„ commit -> push
-    4. ì˜¤ë¥˜ ë°œìƒ (~~ git pull~~)
-    5. Local Bì—ì„œ git pull
-    6. ìë™ìœ¼ë¡œ vim commit ë°œìƒ
-    7. ì €ì¥í•˜ë©´, merge commit ë°œìƒ
-    8. Local Bì—ì„œ git push!
-    ```
+   ```
+   1. Local A¿¡¼­ ÀÛ¾÷ ÈÄ Push
+   2. Local B¿¡¼­ ÀÛ¾÷ ½Ã pullÀ» ¹ŞÁö ¾ÊÀ½.
+   3. Local B¿¡¼­ ´Ù¸¥ ÆÄÀÏ ÀÛ¾÷ ÈÄ commit -> push
+   4. ¿À·ù ¹ß»ı(~~git pull~~)
+   5. Local B¿¡¼­ git pull
+   6. ÀÚµ¿À¸·Î vim commit ÇÒ ¼ö ÀÖµµ·Ï ¶ä.
+   7. ÀúÀåÇÏ¸é, merge commit ¹ß»ı
+   8. Local B¿¡¼­ git push!
+   ```
 
 2. merge conflict
 
-   - ë‹¤ë¥¸ ì´ë ¥(ì»¤ë°‹)ìœ¼ë¡œ ë™ì¼í•œ ~~~
+   * ´Ù¸¥ ÀÌ·Â(Ä¿¹Ô)À¸·Î µ¿ÀÏÇÑ ÆÄÀÏÀÌ ¼öÁ¤µÇ´Â °æ¿ì merge conflict ¹ß»ı.
+   * Á÷Á¢ Ãæµ¹ ÆÄÀÏÀ» ÇØ°á ÇØ¾ß ÇÑ´Ù!
 
-   - ì§ì ‘ ì¶©ëŒ íŒŒì¼ì„ í•´ê²° í•´ì•¼ í•œë‹¤!
+   ```
+   1. Local A¿¡¼­ ÀÛ¾÷ ÈÄ Push
+   2. Local B¿¡¼­ ÀÛ¾÷ ½Ã pullÀ» ¹ŞÁö ¾ÊÀ½.
+   3. Local B¿¡¼­ µ¿ÀÏ ÆÄÀÏ ÀÛ¾÷ ÈÄ commit -> push
+   4. ¿À·ù ¹ß»ı(~~git pull~~)
+   5. Local B¿¡¼­ git pull
+   6. Ãæµ¹ ¹ß»ı(merge conflict)
+   7. Á÷Á¢ ¿À·ù ¼öÁ¤ ¹× add, commit
+   8. Local B¿¡¼­ git push
+   ```
+
+   * `git status` ¸í·É¾î¸¦ ÅëÇØ ¾î´À ÆÄÀÏ¿¡¼­ Ãæµ¹ÀÌ ¹ß»ıÇÏ¿´´ÂÁö È®ÀÎ °¡´É!
+
+   * ½ÇÁ¦ ÆÄÀÏ ¿¹½Ã
 
      ```
-     1. local a ì—ì„œ ì‘ì—… í›„ push
-     2. local b ì—ì„œ ì‘ì—… ì‹œ pullì„ ë°›ì§€ ì•ŠìŒ.
-     3. local b ì—ì„œë™ì¼ íŒŒì¼ ì‘ì—… í›„ commit -> push
-     4. ì˜¤ë¥˜ ë°œìƒ (~~ git pull~~)
-     5. Local Bì—ì„œ git pull
-     6. ì¶©ëŒ ë°œìƒ(merge conflict)
-     7. ì§ì ‘ ì˜¤ë¥˜ ìˆ˜ì • ë° add, commit
-     8. Local Bì—ì„œ git push
+     <<<<<<< HEAD
+     Local BÀÛ¾÷
+     =======
+     ¿ø°İ ÀúÀå¼Ò¿¡ ±â·ÏµÈ ÀÛ¾÷
+     >>>>>>> fajskh213ht12h4fahjkfhsdk
      ```
 
-   - git status ëª…ë ¹ì–´ë¥¼ í†µí•´ ì–´ëŠíŒŒì¼ì—ì„œ ì¶©ëŒì´ ë°œìƒí•˜ì˜€ëŠ”ì§€ í™•ì¸ ê°€ëŠ¥!
 
-   - ì‹¤ì œ íŒŒì¼ ì˜ˆì‹œ
+## 4. µÇµ¹¸®±â
 
+1. `Staging area` ¿¡¼­ unstage
+
+   ```bash
+   $ git status
+   On branch master
+   Your branch is ahead of 'origin/master' by 1 commit.
+     (use "git push" to publish your local commits)
+   
+   Changes to be committed:
+     (use "git reset HEAD <file>..." to unstage)
+   
+           deleted:    b.txt
+   $ git reset HEAD b.txt
+   ```
+
+2. commit ¸Ş½ÃÁö ¼öÁ¤ÇÏ±â
+
+   ```bash
+   $ git commit --amend
+   ```
+
+   * Ä¿¹Ô ¸Ş½ÃÁö¸¦ ¼öÁ¤ÇÏ°Ô µÇ¸é ÇØ½Ã°ªÀÌ º¯°æµÇ¾î ÀÌ·ÂÀÌ º¯È­ÇÏ°Ô µÈ´Ù.
+
+   * µû¶ó¼­ ¿ø°İ ÀúÀå¼Ò¿¡ pushµÈ ÀÌ·ÂÀÌ¶ó¸é Àı´ë º¯°æÇÏ¸é ¾ÈµÈ´Ù!
+
+   * Ä¿¹ÔÀ» ÇÏ´Â °úÁ¤¿¡¼­ ÆÄÀÏÀ» ºü¶ß·È´Ù¸é, À§ÀÇ ¸í·É¾î¸¦ ÅëÇØ¼­ ¼öÁ¤ÇÒ ¼öµµ ÀÖ´Ù!
+
+     ```bash
+     $ git add omit_file.txt
+     $ git commit --amend
      ```
-     <<<<<<<<<<< HEAD
-     Local B ì‘ì—…
-     =========
-     ì›ê²© ì €ì¥ì†Œì— ê¸°ë¡ëœ ì‘ì—…
-     >>>>>>>>>>> fja9f2ifsfj2dj2djajsd99sjd
-     ```
 
-     
+3. `working directory` º¯°æ»çÇ× ¹ö¸®±â
+
+   ```bash
+   $ git checkout -- ÆÄÀÏ¸í
+   ```
+
+   * º¯°æ»çÇ×ÀÌ ¸ğµÎ »èÁ¦ µÇ°í, ÇØ´ç ÆÄÀÏÀÇ ÀÌÀü Ä¿¹Ô »óÅÂ·Î º¯È­ÇÑ´Ù!
+
+
+
+
+
 
 
 
