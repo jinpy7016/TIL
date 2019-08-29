@@ -1,0 +1,572 @@
+분산 컴퓨팅 필요 조건
+1. 장애 허용 -  분산 클러스터 노드 중 하나가 문제가 생겨도 메인 컴퓨팅 프로세스에  부정적인 영향 주지 않아야 한다. (프로세스 실패가 발생하지 않아야 한다)
+2.복구능력 - 분산 클러스터 노드에서 수행중인 작업이 실패하더라도 작업으로부터 어떤 데이터도 손실 되어서는 안된다.
+3.선형적 확장성 - 컴퓨팅 능력, 스토리지 공간 확장등, 성능도 선형적으로 증가해야 합니다.
+
+하둡 아키텍처 : HDFS, Yarn, MapReduce, API
+
+하둡 클러스터 : 하둡분산파일시스템(HDFS)과 클러스터 리소스 매니저(Yarn)를 기반으로 하는 하둡 소프트웨어를 사용하는 컴퓨터들의 집합
+
+Hadoop2.0부터 마스터 노드 2개 이상 구성하여 고가용성(HA)을 지원합니다.
+마스터 노드 (Active, Standby) :
+-하둡 클러스터의 작업을 중재
+-하둡 클라이언트는 파일을 저장, 읽고 , 처리하려면 master노드에 접속합니다.
+-namenode가 구성되고, 파일을 저장, 쓰기 요청에 대해서  파일시스템의 메타 정보 관리
+-mapreduce 작업의 중재하는 프로세스 JobTracker가 구성
+
+워커노드(슬레이드 노드) : 마스터 노드의 지시를 받아서 명령을 수행 (실제 데이터를 저장하고, 데이터 처리 프로세싱하는 노드, TaskTracker)
+
+
+HDFS는 HDFS의 스토리지를 관리
+NameNode - HDFS 파일 시스템 디렉토리 트리와 파일의 위치등 HDFS 스토리지 관련 메타 정보(블럭 데이터를 데이터노드에 매핑)를 관리
+파일 , 디렉토리, 생성, 열기, 쓰기 오퍼레이션 수행
+어떤 데이터 노드에 복제되고, 복제 후에 삭제할지 결정
+데이터 노드에서 보내온 하트비트와 블록 리포트를 처리 (블록 위치 유지, 데이터 노드의 상태 관리)
+
+SecondaryNameNode - HDFS 스토리지 메타 정보 업데이트 (기본 1시간 간격, fsimage파일과 editlog파일을 merge)
+
+DataNode - 마스터 노드에 접속 유지, 3초 간격으로 heartbit, block report를 주기적으로 전송, 마스터 노드의 요청을 처리(block저장, block 삭제)
+로컬 파일 시스템에 블록을 저장
+데이터에 대한 읽기, 쓰기 수행
+데이터 블록 생성 및 삭제 수행
+클러스터에 데이터 블럭 복제
+주기적으로 하트비트와 블럭 리포트 전송
+
+
+
+Yarn 서비스
+resource manager - 마스터 노드에서 실행, 클러스터의 리소스를 나눠주는 역할,   Task들에 대한 스케줄링
+node manager - 워크 노드에서 실행, Task들을 실행시키고 관리, resource manager와 관계 유지, 태스트 상태, 노드 상태 관리
+application manager - 클러스터에서의 메인이 되는 마스터 프로세스로서 어플리케이션별로 하나씩 실행됨, 클러스터에서 실행되는 어플리케이션의 실행 조율, 리소스 매니저와 통신(관계 유지)하면서 리소스 조절
+
+하둡 클러스터에서 장애 허용과 복구 능력을 위해 sharding, replication을 수행합니다.
+배치 처리, 파일 기반 처리 (map의 처리 결과도 map처리된 datanode에 파일로 저장, reducer의 출력결과도 hdfs에 저장 , disk기반, stream기반, sequential하게 처리)
+
+
+
+
+
+
+
+
+실습 
+히스토리 서버 실행
+[hadoop@master sbin]$ ./mr-jobhistory-daemon.sh start historyserver
+
+[hadoop@master sbin]$ jps
+15314 NameNode
+16547 JobHistoryServer
+15735 ResourceManager
+16600 Jps
+15867 NodeManager
+15468 DataNode
+
+맵 사이드 조인 - 조인될 데이터를 setup 메서드에서 hashtable에 저장 ~~
+리듀스 사이드 조인 - ~~~~
+
+
+
+
+
+맵 사이드 조인 실습
+
+[hadoop@master ~]$ hadoop fs -mkdir /data/metadata
+[hadoop@master ~]$ hadoop fs -put ./Downloads/carriers.csv  /data/metadata/
+
+============================================================================
+//MapperWithMapsideJoin.java
+package lab.hadoop.join;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Hashtable;
+
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+
+public class MapperWithMapsideJoin extends
+		Mapper<LongWritable, Text, Text, Text> {
+
+	private Hashtable<String, String> joinMap 
+	                     = new Hashtable<String, String>();
+
+	// map 출력키
+	private Text outputKey = new Text();
+
+	@Override
+	public void setup(Context context) throws IOException, 
+	                                       InterruptedException {
+		try {
+			// 분산캐시 조회
+			Path[] cacheFiles = DistributedCache.getLocalCacheFiles(context
+					.getConfiguration());
+			// 조인 데이터 생성
+			if (cacheFiles != null && cacheFiles.length > 0) {
+				String line;
+				String[] tokens;
+				BufferedReader br = new BufferedReader(new FileReader(
+						cacheFiles[0].toString()));
+				try {
+					while ((line = br.readLine()) != null) {
+						tokens = line.toString().replaceAll("\"", "")
+								.split(",");
+						joinMap.put(tokens[0], tokens[1]);
+					}
+				} finally {
+					br.close();
+				}
+			} else {
+				System.out.println("### cache files is null!");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void map(LongWritable key, Text value, Context context)
+			throws IOException, InterruptedException {
+
+		if (key.get() > 0) {
+			// 콤마 구분자 분리
+			String[] colums = value.toString().split(",");
+			if (colums != null && colums.length > 0) {
+				try {
+					outputKey.set(joinMap.get(colums[8]));
+					context.write(outputKey, value);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+}
+
+=============================================================================
+//MapsideJoin.java
+package lab.hadoop.join;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+
+public class MapsideJoin extends Configured implements Tool {
+
+	public int run(String[] args) throws Exception {
+		String[] otherArgs = new GenericOptionsParser(getConf(), args)
+				.getRemainingArgs();
+		// 입력출 데이터 경로 확인
+		if (otherArgs.length != 3) {
+			System.err.println("Usage: MapsideJoin <metadata> <in> <out>");
+			System.exit(2);
+		}
+		
+		Configuration conf = new Configuration();
+
+		// 파일 시스템 제어 객체 생성
+		FileSystem hdfs = FileSystem.get(conf);
+		// 경로 체크
+		Path path = new Path(args[2]);
+		if (hdfs.exists(path)) {
+			hdfs.delete(path, true);
+		}
+		
+		// Job 이름 설정
+		Job job = new Job(getConf(), "MapsideJoin");
+
+		// 분산 캐시 설정
+		DistributedCache.addCacheFile(new Path(otherArgs[0]).toUri(),
+				job.getConfiguration());
+
+		// 입출력 데이터 경로 설정
+		FileInputFormat.addInputPath(job, new Path(otherArgs[1]));
+		FileOutputFormat.setOutputPath(job, new Path(otherArgs[2]));
+
+		// Job 클래스 설정
+		job.setJarByClass(MapsideJoin.class);
+		// Mapper 설정
+		job.setMapperClass(MapperWithMapsideJoin.class);
+		// Reducer 설정
+		job.setNumReduceTasks(0);
+
+		// 입출력 데이터 포맷 설정
+		job.setInputFormatClass(TextInputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
+
+		// 출력키 및 출력값 유형 설정
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(Text.class);
+
+		job.waitForCompletion(true);
+		return 0;
+	}
+
+	public static void main(String[] args) throws Exception {
+		// Tool 인터페이스 실행
+		int res = ToolRunner.run(new Configuration(), new MapsideJoin(), args);
+		System.out.println("## RESULT:" + res);
+	}
+}
+
+
+==============================================================
+
+export jar 한 뒤에 
+
+[hadoop@master ~]$ hadoop fs -mkdir /output/mapjoin
+[hadoop@master ~]$ hadoop jar ./mapsidejoin.jar /data/metadata/carriers.csv /data/airline/ /output/mapjoin
+
+결과 > 
+[hadoop@master ~]$ hadoop fs -tail /output/mapjoin/part-m-00000
+3SW,81,82,60,-7,-6,LAX,OAK,337,4,17,0,,0,NA,NA,NA,NA,NA
+Skywest Airlines Inc.	2008,3,16,7,2023,2022,2114,2132,OO,6508,N925SW,111,130,89,-18,1,BOI,LAX,674,11,11,0,,0,NA,NA,NA,NA,NA
+Skywest Airlines Inc.	2008,3,16,7,1642,1650,2001,1956,OO,6508,N925SW,139,126,124,5,-8,LAX,BOI,674,2,13,0,,0,NA,NA,NA,NA,NA
+Skywest Airlines Inc.	2008,3,16,7,651,657,817,836,OO,6509,N973SW,86,99,71,-19,-6,TUS,LAX,451,4,11,0,,0,NA,NA,NA,NA,NA
+Skywest Airlines Inc.	2008,3,16,7,1738,1743,1855,1909,OO,6510,N917SW,77,86,54,-14,-5,SMF,LAX,373,9,14,0,,0,NA,NA,NA,NA,NA
+Skywest Airlines Inc.	2008,3,16,7,2025,2035,2139,2138,OO,6511,N973SW,74,63,40,1,-10,LAX,FAT,209,4,30,0,,0,NA,NA,NA,NA,NA
+Skywest Airlines Inc.	2008,3,16,7,803,805,1126,1123,OO,6512,N905SW,143,138,114,3,-2,LAX,COS,833,7,22,0,,0,NA,NA,NA,NA,NA
+Skywest Airlines Inc.	2008,3,16,7,NA,1119,NA,1255,OO,6514,N959SW,NA,156,NA,NA,NA,COS,LAX,833,NA,NA,1,B,0,NA,NA,NA,NA,NA
+Skywest Airlines Inc.	2008,3,16,7,1200,1158,1327,1325,OO,6515,N917SW,87,87,61,2,2,LAX,OAK,337,5,21,0,,0,NA,NA,NA,NA,NA
+
+
+------------------------------------------------------------------
+리듀스 사이드 조인 실습 > 
+
+==================CarrierCodeMapper.java====================
+import java.io.IOException;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+
+public class CarrierCodeMapper extends Mapper<LongWritable, Text, Text, Text> {
+	// 태그 선언
+	public final static String DATA_TAG = "A";
+
+	private Text outputKey = new Text();
+	private Text outputValue = new Text();
+
+	public void map(LongWritable key, Text value, Context context)
+			throws IOException, InterruptedException {
+		if (key.get() > 0) {
+			String[] colums = value.toString().replaceAll("\"", "").split(",");
+			if (colums != null && colums.length > 0) {
+				outputKey.set(colums[0] + "_" + DATA_TAG);
+				outputValue.set(colums[1]);
+				context.write(outputKey, outputValue);
+			}
+		}
+	}
+}
+===========================MapperWithReducesideJoin.java=================
+
+
+import java.io.IOException;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+
+public class MapperWithReducesideJoin extends
+		Mapper<LongWritable, Text, Text, Text> {
+
+	// 태그 선언
+	public final static String DATA_TAG = "B";
+
+	// map 출력키
+	private Text outputKey = new Text();
+
+	public void map(LongWritable key, Text value, Context context)
+			throws IOException, InterruptedException {
+
+		if (key.get() > 0) {
+			// 콤마 구분자 분리
+			String[] colums = value.toString().split(",");
+			if (colums != null && colums.length > 0) {
+				try {
+					outputKey.set(colums[8] + "_" + DATA_TAG);
+					context.write(outputKey, value);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+}
+
+====================ReducerWithReducesideJoin.java==================
+
+import java.io.IOException;
+
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Reducer;
+
+public class ReducerWithReducesideJoin extends Reducer<Text, Text, Text, Text> {
+
+	// reduce 출력키
+	private Text outputKey = new Text();
+	private Text outputValue = new Text();
+
+	public void reduce(Text key, Iterable<Text> values, Context context)
+			throws IOException, InterruptedException {
+		// 태그 조회
+		String tagValue = key.toString().split("_")[1];
+
+		for (Text value : values) {
+			// 출력키 설정
+			if (tagValue.equals(CarrierCodeMapper.DATA_TAG)) {
+				outputKey.set(value);
+				// 출력값 설정 및 출력 데이터 생성
+			} else if (tagValue.equals(MapperWithReducesideJoin.DATA_TAG)) {
+				outputValue.set(value);
+				context.write(outputKey, outputValue);
+			}
+
+		}
+
+	}
+
+}
+
+
+
+=================ReducesideJoin.java=========================
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+
+public class ReducesideJoin extends Configured implements Tool {
+
+	public int run(String[] args) throws Exception {
+		String[] otherArgs = new GenericOptionsParser(getConf(), args)
+				.getRemainingArgs();
+		// 입력출 데이터 경로 확인
+		if (otherArgs.length != 3) {
+			System.err.println("Usage: ReducesideJoin <metadata> <in> <out>");
+			System.exit(2);
+		}
+
+		Configuration conf = new Configuration();
+
+		// 파일 시스템 제어 객체 생성
+		FileSystem hdfs = FileSystem.get(conf);
+		// 경로 체크
+		Path path = new Path(args[2]);
+		if (hdfs.exists(path)) {
+			hdfs.delete(path, true);
+		}
+		
+		// Job 이름 설정
+		Job job = new Job(getConf(), "ReducesideJoin");
+
+		// 출력 데이터 경로 설정
+		FileOutputFormat.setOutputPath(job, new Path(otherArgs[2]));
+
+		// Job 클래스 설정
+		job.setJarByClass(ReducesideJoin.class);
+		// Reducer 설정
+		job.setReducerClass(ReducerWithReducesideJoin.class);
+
+		// 입출력 데이터 포맷 설정
+		job.setInputFormatClass(TextInputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
+
+		// 출력키 및 출력값 유형 설정
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(Text.class);
+
+		// MultipleInputs 설정
+		MultipleInputs.addInputPath(job, new Path(otherArgs[0]),
+				TextInputFormat.class, CarrierCodeMapper.class);
+		MultipleInputs.addInputPath(job, new Path(otherArgs[1]),
+				TextInputFormat.class, MapperWithReducesideJoin.class);
+
+		job.waitForCompletion(true);
+		return 0;
+	}
+
+	public static void main(String[] args) throws Exception {
+		// Tool 인터페이스 실행
+		int res = ToolRunner.run(new Configuration(), new ReducesideJoin(),
+				args);
+		System.out.println("## RESULT:" + res);
+	}
+}
+
+
+
+
+===========================================================
+
+[hadoop@master ~]$ hadoop -mkdir /output/sidejoin
+[hadoop@master ~]$ hadoop jar ./reducesidejoin.jar /data/metadata/carriers.csv /data/airline /output/sidejoin
+
+결과 > 
+[hadoop@master ~]$ hadoop fs -tail /output/sidejoin/part-m-00000
+
+
+
+
+
+
+---------------------------------------------------------------
+Hive 특징 ~~
+설치 > 
+
+http://www.apache.org/dyn/closer.cgi/hive/
+
+[root@master local]# tar -xzvf /home/hadoop/Downloads/apache-hive-1.2.2-bin.tar.gz 
+[root@master local]# chown -R hadoop:hadoop apache-hive-1.2.2-bin/
+
+[root@master local]# ln -s apache-hive-1.2.2-bin/  hive
+[root@master local]# ls -l
+
+[root@master local]# chown -R hadoop:hadoop hive
+[root@master local]# ls -l
+
+#마스터에서 hadoop 환경설정 파일 변경
+[root@master local]# su - hadoop
+[hadoop@master ~]$ vi .bash_profile
+
+export HIVE_HOME=/usr/local/hive
+export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HIVE_HOME/bin:
+
+
+
+#마스터 노드에 hive 메타스토어 mysql 구성 (로컬모드)
+[root@master ~]# rpm -ivh /home/hadoop/Downloads/mysql-community-release-el6-5.noarch.rpm
+[root@master ~]#  ls -la /etc/yum.repos.d/
+[root@master ~]# yum install mysql-server
+
+[root@master ~]# ls /usr/bin/mysql
+[root@master ~]# ls /usr/sbin/mysqld
+
+#mysql 서버 시작
+[root@master ~]#  service mysqld start
+
+[root@master ~]# mysql --version
+[root@master ~]# netstat -anp | grep mysql
+
+
+
+ 
+[root@master ~]#  mysql 
+#루트 사용자의 암호를 설정한다.
+ 
+mysql> grant all privileges on *.* to hive@localhost identified by 'hive' with grant option  
+mysql> show databases;
+mysql> use mysql
+mysql> show tables;
+mysql> select user from user;
+mysql> flush privileges;
+ 
+ 
+ 
+# hive-env.sh  설정파일 생성 및 변경
+[hadoop@master ~]$ cd /usr/local/hive/conf/
+[hadoop@master ~]$ cp hive-env.sh.template  hive-env.sh
+[hadoop@master ~]$ vi hive-env.sh
+HADOOP_HOME=/usr/local/hadoop-2.7.7
+[hadoop@master ~]$  chmod 755 hive-env.sh 
+
+
+
+# /usr/local/hive/conf/hive-site.xml을 수정
+[hadoop@master ~]$ vi /usr/local/hive/conf/hive-site.xml
+
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+<property>
+  <name>hive.metastore.local</name>
+  <value>true</value>
+</property>
+<property>
+  <name>javax.jdo.option.ConnectionURL</name>
+  <value>jdbc:mysql://localhost:3306/metastore_db?createDatabaseIfNotExist=true</value>
+  <description>JDBC connect string for a JDBC metastore</description>
+</property>
+<property>
+  <name>javax.jdo.option.ConnectionDriverName</name>
+  <value>com.mysql.jdbc.Driver</value>
+  <description>Driver class name for a JDBC metastore</description>
+</property>
+<property>
+  <name>javax.jdo.option.ConnectionUserName</name>
+  <value>hive</value>
+  <description>username to use against metastore database</description>
+</property>
+<property>
+  <name>javax.jdo.option.ConnectionPassword</name>
+  <value>hive</value>
+  <description>password to use against metastore database</description>
+</property> 
+  </configuration>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

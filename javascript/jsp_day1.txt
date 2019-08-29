@@ -1,0 +1,16 @@
+자바 기반의 웹 어플리케이션에서 jsp의 역할 - view(사용자에게 제공되는 content, 입력페이지)
+정적지시자 <%@ page ...%> <% include ...%> <%@ taglib ... $>
+동적 태그 <jsp:include .../> <jsp:forward ... />
+<jsp:setProperty .../><jsp:getProperty .../>
+
+자바 코드와 관련된 jsp요소
+
+<%!
+	변수 선언 초기화;//
+	메서드 정의      //
+%>
+<%
+	자바 실행 문장; //변환된 서블릿에 _jspService()에 포함
+	...
+%>
+<%= 출력내용 %> 는 <%
