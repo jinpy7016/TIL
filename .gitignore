@@ -1,4 +1,4 @@
 .settings/
 data.csv
-*/venv/*
+venv/
 *.env
