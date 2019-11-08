@@ -1,3 +1,4 @@
 .settings/
 data.csv
-./python/Day2/venv/
+*/venv/*
+*.env
