@@ -1,0 +1,8 @@
+{% load staticfiles %}
+<h3>안녕! 난 불꽃 열정을 가진 {{ name }}!</h3>
+<h3>겂없는 {{ age }}살 이지.</h3>
+<br>
+<img src="{% static 'images/penguin.jpg' %}">
+<h3>내 인디언 스승인 <{{ indian }}> 님이 이번주 로또 번호를 점지해 줄거야!</h3>
+<h3>이번주 로또는 {{ lottoNum|join:"," }}!!</h3>
+<h3>행운이 있길 바래 ~ 찡긋 </h3>

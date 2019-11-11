@@ -1,0 +1,9 @@
+{% now "m" as current_month %}
+{% now "d" as current_year %}
+
+{% if current_month == '12' and current_year == '25' %}
+    <h1>네</h1>  
+{% else %}
+    <h1>아니요</h1>
+    <h1>{{ d_day }}</h1>
+{% endif %}
