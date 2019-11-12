@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} load static {% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{%static 'stylesheets/pages/style.css'%}">
+{% endblock %}
+
+{% block body %}
+<h1>static 파일 실습</h1>
+<img src="{% static 'images/images.png' %}" alt="라이언">
+{% endblock %}
