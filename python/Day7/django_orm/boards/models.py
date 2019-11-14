@@ -9,3 +9,16 @@ class Board(models.Model):
 
     def __str__(self):
         return f'{self.id} : {self.title}'
+
+class Subway(models.Model):
+    name = models.CharField(max_length=30)
+    date = models.DateTimeField()
+    sandwitch =  models.CharField(max_length=30)
+    size = models.IntegerField()
+    bread = models.CharField(max_length=30)
+    source = models.CharField(max_length=30)
+    
+    def __str__(self):
+        return f'{self.id} : {self.name}'
+    # def __str__(self):
+    #     return f'{self.id} : {self.title}'

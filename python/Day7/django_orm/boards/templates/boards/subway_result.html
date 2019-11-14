@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %} Subway {% endblock %}
+{% block content %}
+
+{% for menu in menu_list %}
+  <h3>{{ menu.name }}</h3>
+  <h3>{{ menu.date }}</h3>
+  <h3>{{ menu.sandwitch }}</h3>
+  <h3>{{ menu.size }}</h3>
+{% endfor %}
+
+{% endblock %}
