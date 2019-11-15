@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block body %}
+제목 : {{ article.title }} <br>
+내용 : {{ article.content }} <br>
+<a href="/crud/modify/{{ article.id }}/">수정하기</a> <a href="/crud/delete/{{ article.id }}/">삭제하기</a>
+{% endblock %}
