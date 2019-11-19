@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>질문 List</h1>
+<ul>
+    {% for q in questions %}
+    <li><a href="{% url 'boards:detail' q.id %}">{{q.question}}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

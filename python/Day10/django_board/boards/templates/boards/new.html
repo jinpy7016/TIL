@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block body %}
+
+<form action='' method='POST'>
+        {% csrf_token %}
+        <input type="text" style="width:300px;" name="question"> <br><br>
+        <input type='submit' value="질문 등록">
+</form>
+
+{% endblock %}
