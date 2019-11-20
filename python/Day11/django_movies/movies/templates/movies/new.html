@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block body %}
+<form action='{% url "movies:new" %}' method='POST'>
+    {% csrf_token %}
+    제목:<input type="text" name="title"> <br>
+    제목(영문):<input type="text" name="title_en"> <br>
+    관객수:<input type="number" name="audience"> <br>
+    개봉일:<input type="date" name="open_date"><br>
+    장르:<input type="text" name="genre"><br>
+    관람등급:<input type="text" name="watch_grade"><br>
+    평점:<input type="number" name="score"><br>
+    포스터URL:<input type="text" name="poster_url"><br>
+    요약:<textarea name="description" id="" cols="30" rows="10"></textarea>
+    <input type='submit'>
+</form>
+{% endblock %}

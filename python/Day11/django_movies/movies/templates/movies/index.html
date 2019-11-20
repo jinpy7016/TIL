@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>Movie List</h1>
+<a href="{% url 'movies:new' %}">새 영화 등록</a>
+
+{% for m in movies %}
+<li><a href="{% url 'movies:detail' m.id %}">{{m.title}}</a>  {{m.score}}점</li>
+{% endfor %}
+
+{% endblock %}
