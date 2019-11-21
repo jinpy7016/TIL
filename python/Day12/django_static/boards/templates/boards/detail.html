@@ -1,0 +1,14 @@
+<h2>Detail Page</h2>
+
+<div>
+TITLE : {{board.title}} <br>
+
+content : {{board.content}} <br>
+
+IMAGE : <br>
+<img src="{{board.image.url}}" alt="{{board.image}}" >
+<!-- <img src="{#{board.image_thumb.url}}" alt="{#{board.image}}" > -->
+</div>
+
+<a href="{% url 'boards:edit' board.id %}">수정하기</a>
+

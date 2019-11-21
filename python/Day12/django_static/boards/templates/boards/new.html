@@ -1,0 +1,9 @@
+<h1>새로 만들기 </h1>
+
+<form action="{% url 'boards:new' %}" enctype="multipart/form-data" method="POST">
+    {% csrf_token %}
+    타이틀 : <input type="text" name="title" required><br>
+    콘텐츠 : <input type="text" name="content" required><br>
+    <input type="file" name="image" accept="image/*">
+    <input type="submit" value="제출하기">
+</form>

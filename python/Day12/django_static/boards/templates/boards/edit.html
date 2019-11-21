@@ -1,0 +1,10 @@
+<h1>수정하기 </h1>
+
+<form action="{% url 'boards:edit' board.id %}" enctype="multipart/form-data" method="POST">
+    {% csrf_token %}
+    타이틀 : <input type="text" name="title" required value="{{board.title}}"><br>
+    콘텐츠 : <input type="text" name="content" required value="{{board.content}}"><br>
+    <input type="file" name="image" accept="image/*" >
+    <!-- file 인풋은 value 값이 없어서 설정 못함.system-message-title-->
+    <input type="submit" value="제출하기">
+</form>
