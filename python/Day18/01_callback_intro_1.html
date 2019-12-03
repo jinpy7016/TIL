@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <button id="myButton">눌러볼래?</button>
+    <script>
+        const button = document.getElementById('myButton')
+        button.addEventListener('click',function(){
+            console.log('눌렀니?')
+        })
+
+        function doSomething(task, callback){
+            alert(task+' 준비를 해봅시다!!')
+            callback()
+        }
+        doSomething('탕수육먹을',function(){
+            alert('탕수육 사먹으러 가자')
+        })
+    </script>
+</body>
+</html>

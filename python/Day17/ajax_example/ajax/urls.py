@@ -5,6 +5,6 @@ app_name='ajax'
 
 urlpatterns =[
     path('', views.index, name="index"),
-    path('search/', views.ajax, name="ajax"),
+    path('search_wiki/', views.ajax, name="ajax"),
 
 ]

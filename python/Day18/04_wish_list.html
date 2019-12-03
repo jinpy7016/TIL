@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <h1>my wish list</h1>
+    내가 원하는건 : <input type="text" id="wish-input">
+    <button id="add-button">추가하기</button>
+
+    <ol id="wish-list">
+
+
+    </ol>
+
+    <script>
+        const input = document.querySelector('#wish-input')
+        const button = document.querySelector('#add-button')
+        const ol = document.querySelector('#wish-list')
+
+       button.addEventListener('click',function(){
+           
+            const item = document.createElement('li')
+            item.innerText = input.value
+
+            const delButton = document.createElement('button')
+            delButton.innerText = "삭제!"
+            delButton.addEventListener('click',function(element){
+                this.parentNode.remove()
+            })
+            
+            item.append(delButton)
+            
+            ol.appendChild(item)
+            input.value = ''
+            alert('등록 완료')
+       })
+    
+    </script>
+</body>
+</html>
